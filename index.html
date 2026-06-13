@@ -35,6 +35,7 @@
           <option value="modern">Modern</option>
           <option value="minimal">Minimal</option>
           <option value="creative">Creative</option>
+          <option value="ats">ATS Template</option>
         </select>
       </label>
 
@@ -103,10 +104,10 @@
             <button class="secondary-button" type="button" id="loadSample">Load Sample</button>
           </div>
           <div class="field-grid two">
-            <label>Full Name <input data-field="personal.fullName" name="fullName" required placeholder="Pavan Ramesh Malthi"></label>
+            <label>Full Name <input data-field="personal.fullName" name="fullName" required placeholder="Enter your full name"></label>
             <label>Email Address <input data-field="personal.email" name="email" type="email" required placeholder="name@email.com"></label>
-            <label>Phone Number <input data-field="personal.phone" name="phone" required pattern="[0-9+() -]{7,}" placeholder="+91 6281443691"></label>
-            <label>Address <input data-field="personal.address" placeholder="Andhra Pradesh, India"></label>
+            <label>Phone Number <input data-field="personal.phone" name="phone" required pattern="[0-9+() -]{7,}" placeholder="Enter your phone number"></label>
+            <label>Address <input data-field="personal.address" placeholder="Enter your address"></label>
             <label>LinkedIn Profile <input data-field="personal.linkedin" type="url" placeholder="https://linkedin.com/in/username"></label>
             <label>GitHub Profile <input data-field="personal.github" type="url" placeholder="https://github.com/username"></label>
             <label class="span-two">Portfolio Website <input data-field="personal.portfolio" type="url" placeholder="https://yourportfolio.com"></label>
@@ -203,6 +204,10 @@
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script src="script.js"></script>
 </body>

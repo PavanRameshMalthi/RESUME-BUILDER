@@ -1,4 +1,4 @@
-const STORAGE_KEY = "resumeBuilderDataV1";
+const STORAGE_KEY = "resumeBuilderDataV2";
 const SAVE_DELAY = 220;
 
 const skillLabels = {
@@ -13,61 +13,38 @@ const sampleData = {
   theme: "light",
   template: "professional",
   personal: {
-    fullName: "Pavan Ramesh Malthi",
-    email: "pavanrameshmalthi886@gmail.com",
-    phone: "6281443691",
-    address: "Andhra Pradesh, India",
-    linkedin: "https://linkedin.com/",
-    github: "https://github.com/",
+    fullName: "",
+    email: "",
+    phone: "",
+    address: "",
+    linkedin: "",
+    github: "",
     portfolio: ""
   },
-  summary: "Enthusiastic BCA student seeking an internship in software development to apply technical skills, gain practical experience, and contribute to real-world projects while continuously improving my knowledge.",
+  summary: "",
   education: [
     {
-      degree: "Bachelor of Computer Applications (BCA)",
-      college: "Aditya Degree College, Kakinada",
-      university: "Adikavi Nannaya University",
-      startYear: "2024",
-      endYear: "2027",
-      score: ""
-    },
-    {
-      degree: "Intermediate (12th Grade)",
-      college: "VVS Reddy Junior College",
-      university: "Board of Intermediate Education",
-      startYear: "2022",
-      endYear: "2024",
-      score: ""
-    },
-    {
-      degree: "SSC (10th Grade)",
-      college: "Z.P. High School, Vakatippa, East Godavari",
-      university: "Board of Secondary Education",
-      startYear: "2021",
-      endYear: "2022",
+      degree: "",
+      college: "",
+      university: "",
+      startYear: "",
+      endYear: "",
       score: ""
     }
   ],
   skills: {
-    programming: ["C", "Python", "Java"],
-    frameworks: ["HTML", "CSS", "JavaScript"],
-    databases: ["SQL"],
-    tools: ["Git", "GitHub", "VS Code", "MS Office"],
-    soft: ["Communication", "Teamwork", "Problem Solving"]
+    programming: [],
+    frameworks: [],
+    databases: [],
+    tools: [],
+    soft: []
   },
   projects: [
     {
-      title: "SGPA to CGPA Converter",
-      description: "Developed a browser-based tool that accurately converts SGPA into CGPA using standard academic formulas\nHelps students efficiently track and understand their academic performance across semesters\nBuilt with a clean, intuitive interface for quick grade conversions without page reloads",
-      technologies: "HTML, CSS, JavaScript",
-      github: "https://github.com/",
-      live: ""
-    },
-    {
-      title: "Weather Tracker",
-      description: "Developed a search-based weather application that fetches real-time weather data via REST API integration\nDisplays current temperature, weather conditions, and location details based on user-entered city name\nImplemented error handling for invalid city inputs to ensure a smooth and reliable user experience",
-      technologies: "HTML, CSS, JavaScript, OpenWeatherMap API",
-      github: "https://github.com/",
+      title: "",
+      description: "",
+      technologies: "",
+      github: "",
       live: ""
     }
   ],
@@ -81,19 +58,19 @@ const sampleData = {
   ],
   certifications: [
     {
-      name: "JavaScript Essentials",
-      organization: "Cisco Networking Academy",
-      issueDate: "2026",
+      name: "",
+      organization: "",
+      issueDate: "",
       credentialUrl: ""
     }
   ],
   achievements: {
     awards: "",
-    hackathons: "Participated in college-level hackathon events",
+    hackathons: "",
     competitions: "",
-    academic: "Consistently maintained strong academic performance"
+    academic: ""
   }
-};
+}
 
 let data = mergeData(sampleData, loadData());
 let saveTimer = null;
