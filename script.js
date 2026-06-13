@@ -1,4 +1,4 @@
-const STORAGE_KEY = "resumeBuilderDataV2";
+const STORAGE_KEY = "resumeBuilderDataV3";
 const SAVE_DELAY = 220;
 
 const skillLabels = {
@@ -69,8 +69,7 @@ const sampleData = {
     hackathons: "",
     competitions: "",
     academic: ""
-  }
-}
+  }};
 
 let data = mergeData(sampleData, loadData());
 let saveTimer = null;
@@ -249,12 +248,12 @@ function renderEducation() {
     <div class="repeat-item">
       <div class="repeat-item-header"><span>Education ${index + 1}</span>${removeButton("education", index)}</div>
       <div class="field-grid two">
-        <label>Degree ${fieldInput("education", index, "degree", item.degree, "text", "Bachelor of Computer Applications")}</label>
-        <label>College Name ${fieldInput("education", index, "college", item.college, "text", "College name")}</label>
-        <label>University ${fieldInput("education", index, "university", item.university, "text", "University name")}</label>
-        <label>CGPA / Percentage ${fieldInput("education", index, "score", item.score, "text", "8.5 CGPA / 85%")}</label>
-        <label>Start Year ${fieldInput("education", index, "startYear", item.startYear, "text", "2024")}</label>
-        <label>End Year ${fieldInput("education", index, "endYear", item.endYear, "text", "2027")}</label>
+        <label>Degree ${fieldInput("education", index, "degree", item.degree, "text", "Enter degree")}</label>
+        <label>College Name ${fieldInput("education", index, "college", item.college, "text", "Enter college name")}</label>
+        <label>University ${fieldInput("education", index, "university", item.university, "text", "Enter university name")}</label>
+        <label>CGPA / Percentage ${fieldInput("education", index, "score", item.score, "text", "Enter CGPA / percentage")}</label>
+        <label>Start Year ${fieldInput("education", index, "startYear", item.startYear, "text", "Enter start year")}</label>
+        <label>End Year ${fieldInput("education", index, "endYear", item.endYear, "text", "Enter end year")}</label>
       </div>
     </div>
   `).join("");
@@ -266,11 +265,11 @@ function renderProjects() {
     <div class="repeat-item">
       <div class="repeat-item-header"><span>Project ${index + 1}</span>${removeButton("projects", index)}</div>
       <div class="field-grid two">
-        <label>Project Title ${fieldInput("projects", index, "title", item.title, "text", "Weather App")}</label>
-        <label>Technologies Used ${fieldInput("projects", index, "technologies", item.technologies, "text", "HTML, CSS, JavaScript")}</label>
-        <label>GitHub Link ${fieldInput("projects", index, "github", item.github, "url", "https://github.com/user/project")}</label>
-        <label>Live Demo Link ${fieldInput("projects", index, "live", item.live, "url", "https://project-demo.com")}</label>
-        <label class="span-two">Description ${fieldInput("projects", index, "description", item.description, "textarea", "Write one responsibility or feature per line")}</label>
+        <label>Project Title ${fieldInput("projects", index, "title", item.title, "text", "Enter project title")}</label>
+        <label>Technologies Used ${fieldInput("projects", index, "technologies", item.technologies, "text", "Enter technologies used")}</label>
+        <label>GitHub Link ${fieldInput("projects", index, "github", item.github, "url", "Enter GitHub link")}</label>
+        <label>Live Demo Link ${fieldInput("projects", index, "live", item.live, "url", "Enter live demo link")}</label>
+        <label class="span-two">Description ${fieldInput("projects", index, "description", item.description, "textarea", "Enter project description")}</label>
       </div>
     </div>
   `).join("");
@@ -282,10 +281,10 @@ function renderExperience() {
     <div class="repeat-item">
       <div class="repeat-item-header"><span>Experience ${index + 1}</span>${removeButton("experience", index)}</div>
       <div class="field-grid two">
-        <label>Company Name ${fieldInput("experience", index, "company", item.company, "text", "Company name")}</label>
-        <label>Job Role ${fieldInput("experience", index, "role", item.role, "text", "Frontend Developer Intern")}</label>
-        <label class="span-two">Duration ${fieldInput("experience", index, "duration", item.duration, "text", "Jan 2026 - Mar 2026")}</label>
-        <label class="span-two">Responsibilities ${fieldInput("experience", index, "responsibilities", item.responsibilities, "textarea", "Write one responsibility per line")}</label>
+        <label>Company Name ${fieldInput("experience", index, "company", item.company, "text", "Enter company name")}</label>
+        <label>Job Role ${fieldInput("experience", index, "role", item.role, "text", "Enter job role")}</label>
+        <label class="span-two">Duration ${fieldInput("experience", index, "duration", item.duration, "text", "Enter duration")}</label>
+        <label class="span-two">Responsibilities ${fieldInput("experience", index, "responsibilities", item.responsibilities, "textarea", "Enter responsibilities")}</label>
       </div>
     </div>
   `).join("");
@@ -297,10 +296,10 @@ function renderCertifications() {
     <div class="repeat-item">
       <div class="repeat-item-header"><span>Certification ${index + 1}</span>${removeButton("certifications", index)}</div>
       <div class="field-grid two">
-        <label>Certificate Name ${fieldInput("certifications", index, "name", item.name, "text", "Certificate name")}</label>
-        <label>Organization ${fieldInput("certifications", index, "organization", item.organization, "text", "Organization")}</label>
-        <label>Issue Date ${fieldInput("certifications", index, "issueDate", item.issueDate, "text", "June 2026")}</label>
-        <label>Credential URL ${fieldInput("certifications", index, "credentialUrl", item.credentialUrl, "url", "https://credential-url.com")}</label>
+        <label>Certificate Name ${fieldInput("certifications", index, "name", item.name, "text", "Enter certificate name")}</label>
+        <label>Organization ${fieldInput("certifications", index, "organization", item.organization, "text", "Enter organization")}</label>
+        <label>Issue Date ${fieldInput("certifications", index, "issueDate", item.issueDate, "text", "Enter issue date")}</label>
+        <label>Credential URL ${fieldInput("certifications", index, "credentialUrl", item.credentialUrl, "url", "Enter credential URL")}</label>
       </div>
     </div>
   `).join("");
@@ -312,7 +311,7 @@ function renderSkills() {
     <div class="repeat-item skill-category">
       <span class="field-label">${label}</span>
       <div class="skill-input-row">
-        <input type="text" data-skill-input="${key}" placeholder="Add ${escapeHtml(label.toLowerCase())}">
+        <input type="text" data-skill-input="${key}" placeholder="Enter ${escapeHtml(label.toLowerCase())}">
         <button class="secondary-button" type="button" data-add-skill="${key}">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
           Add
@@ -350,7 +349,7 @@ function headerHtml() {
 
   return `
     <header class="resume-header">
-      <h1>${escapeHtml(personal.fullName || "Your Name")}</h1>
+      <h1>${escapeHtml(personal.fullName || "Enter Name")}</h1>
       <div class="resume-contact">${contacts.map((item) => `<span>${item}</span>`).join("<span>|</span>")}</div>
     </header>
   `;
