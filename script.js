@@ -1,0 +1,765 @@
+const STORAGE_KEY = "resumeBuilderDataV1";
+const SAVE_DELAY = 220;
+
+const skillLabels = {
+  programming: "Programming Languages",
+  frameworks: "Frameworks",
+  databases: "Databases",
+  tools: "Tools",
+  soft: "Soft Skills"
+};
+
+const sampleData = {
+  theme: "light",
+  template: "professional",
+  personal: {
+    fullName: "Pavan Ramesh Malthi",
+    email: "pavanrameshmalthi886@gmail.com",
+    phone: "6281443691",
+    address: "Andhra Pradesh, India",
+    linkedin: "https://linkedin.com/",
+    github: "https://github.com/",
+    portfolio: ""
+  },
+  summary: "Enthusiastic BCA student seeking an internship in software development to apply technical skills, gain practical experience, and contribute to real-world projects while continuously improving my knowledge.",
+  education: [
+    {
+      degree: "Bachelor of Computer Applications (BCA)",
+      college: "Aditya Degree College, Kakinada",
+      university: "Adikavi Nannaya University",
+      startYear: "2024",
+      endYear: "2027",
+      score: ""
+    },
+    {
+      degree: "Intermediate (12th Grade)",
+      college: "VVS Reddy Junior College",
+      university: "Board of Intermediate Education",
+      startYear: "2022",
+      endYear: "2024",
+      score: ""
+    },
+    {
+      degree: "SSC (10th Grade)",
+      college: "Z.P. High School, Vakatippa, East Godavari",
+      university: "Board of Secondary Education",
+      startYear: "2021",
+      endYear: "2022",
+      score: ""
+    }
+  ],
+  skills: {
+    programming: ["C", "Python", "Java"],
+    frameworks: ["HTML", "CSS", "JavaScript"],
+    databases: ["SQL"],
+    tools: ["Git", "GitHub", "VS Code", "MS Office"],
+    soft: ["Communication", "Teamwork", "Problem Solving"]
+  },
+  projects: [
+    {
+      title: "SGPA to CGPA Converter",
+      description: "Developed a browser-based tool that accurately converts SGPA into CGPA using standard academic formulas\nHelps students efficiently track and understand their academic performance across semesters\nBuilt with a clean, intuitive interface for quick grade conversions without page reloads",
+      technologies: "HTML, CSS, JavaScript",
+      github: "https://github.com/",
+      live: ""
+    },
+    {
+      title: "Weather Tracker",
+      description: "Developed a search-based weather application that fetches real-time weather data via REST API integration\nDisplays current temperature, weather conditions, and location details based on user-entered city name\nImplemented error handling for invalid city inputs to ensure a smooth and reliable user experience",
+      technologies: "HTML, CSS, JavaScript, OpenWeatherMap API",
+      github: "https://github.com/",
+      live: ""
+    }
+  ],
+  experience: [
+    {
+      company: "",
+      role: "",
+      duration: "",
+      responsibilities: ""
+    }
+  ],
+  certifications: [
+    {
+      name: "JavaScript Essentials",
+      organization: "Cisco Networking Academy",
+      issueDate: "2026",
+      credentialUrl: ""
+    }
+  ],
+  achievements: {
+    awards: "",
+    hackathons: "Participated in college-level hackathon events",
+    competitions: "",
+    academic: "Consistently maintained strong academic performance"
+  }
+};
+
+let data = mergeData(sampleData, loadData());
+let saveTimer = null;
+
+const form = document.querySelector("#resumeForm");
+const preview = document.querySelector("#resumePreview");
+const saveStatus = document.querySelector("#saveStatus");
+const summaryEditor = document.querySelector("#summaryEditor");
+const summaryCount = document.querySelector("#summaryCount");
+const templateSelect = document.querySelector("#templateSelect");
+const completionBar = document.querySelector("#completionBar");
+const completionText = document.querySelector("#completionText");
+const toast = document.querySelector("#toast");
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function mergeData(base, incoming) {
+  const output = clone(base);
+  if (!incoming || typeof incoming !== "object") return output;
+
+  Object.keys(incoming).forEach((key) => {
+    if (Array.isArray(incoming[key])) {
+      output[key] = incoming[key];
+    } else if (incoming[key] && typeof incoming[key] === "object" && !Array.isArray(incoming[key])) {
+      output[key] = { ...(output[key] || {}), ...incoming[key] };
+    } else {
+      output[key] = incoming[key];
+    }
+  });
+
+  return output;
+}
+
+function loadData() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY));
+  } catch {
+    return null;
+  }
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveStatus.textContent = "Saving...";
+  saveTimer = setTimeout(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    saveStatus.textContent = "Saved";
+  }, SAVE_DELAY);
+}
+
+function getValue(path) {
+  return path.split(".").reduce((acc, key) => (acc ? acc[key] : undefined), data) || "";
+}
+
+function setValue(path, value) {
+  const parts = path.split(".");
+  let target = data;
+  parts.slice(0, -1).forEach((part) => {
+    target[part] = target[part] || {};
+    target = target[part];
+  });
+  target[parts.at(-1)] = value;
+}
+
+function escapeHtml(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function isFilled(value) {
+  return String(value || "").trim().length > 0;
+}
+
+function plainText(html = "") {
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = html;
+  return wrapper.textContent || wrapper.innerText || "";
+}
+
+function sanitizeRichText(html = "") {
+  const template = document.createElement("template");
+  template.innerHTML = html;
+  const allowed = new Set(["B", "STRONG", "I", "EM", "UL", "OL", "LI", "BR", "DIV", "P"]);
+
+  template.content.querySelectorAll("*").forEach((node) => {
+    if (!allowed.has(node.tagName)) {
+      node.replaceWith(document.createTextNode(node.textContent || ""));
+      return;
+    }
+    [...node.attributes].forEach((attr) => node.removeAttribute(attr.name));
+  });
+
+  return template.innerHTML;
+}
+
+function formatUrl(url) {
+  const clean = String(url || "").trim();
+  if (!clean) return "";
+  if (/^(https?:|mailto:|tel:)/i.test(clean)) return clean;
+  return `https://${clean}`;
+}
+
+function link(url, label) {
+  const href = formatUrl(url);
+  if (!href) return "";
+  return `<a href="${escapeHtml(href)}" target="_blank" rel="noreferrer">${escapeHtml(label || href.replace(/^https?:\/\//, ""))}</a>`;
+}
+
+function splitLines(value = "") {
+  return String(value)
+    .split(/\n|;/)
+    .map((item) => item.replace(/^[-*•]\s*/, "").trim())
+    .filter(Boolean);
+}
+
+function listFromText(value) {
+  const items = splitLines(value);
+  if (!items.length) return "";
+  return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+}
+
+function compact(items) {
+  return items.filter((item) => isFilled(item)).join(" | ");
+}
+
+function init() {
+  document.body.classList.toggle("dark", data.theme === "dark");
+  templateSelect.value = data.template;
+  summaryEditor.innerHTML = sanitizeRichText(data.summary);
+  bindStaticFields();
+  renderRepeaters();
+  renderSkills();
+  setThemeButtons();
+  render();
+  updateCompletion();
+  scheduleSave();
+}
+
+function bindStaticFields() {
+  document.querySelectorAll("[data-field]").forEach((field) => {
+    field.value = getValue(field.dataset.field);
+  });
+}
+
+function renderRepeaters() {
+  renderEducation();
+  renderProjects();
+  renderExperience();
+  renderCertifications();
+}
+
+function fieldInput(section, index, key, value, type = "text", placeholder = "") {
+  const isArea = type === "textarea";
+  const common = `data-section="${section}" data-index="${index}" data-key="${key}" placeholder="${escapeHtml(placeholder)}"`;
+  if (isArea) {
+    return `<textarea ${common}>${escapeHtml(value)}</textarea>`;
+  }
+  return `<input type="${type}" value="${escapeHtml(value)}" ${common}>`;
+}
+
+function removeButton(section, index) {
+  return `<button class="icon-button" type="button" data-remove="${section}" data-index="${index}" aria-label="Remove item">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>
+  </button>`;
+}
+
+function renderEducation() {
+  const container = document.querySelector("#educationList");
+  container.innerHTML = data.education.map((item, index) => `
+    <div class="repeat-item">
+      <div class="repeat-item-header"><span>Education ${index + 1}</span>${removeButton("education", index)}</div>
+      <div class="field-grid two">
+        <label>Degree ${fieldInput("education", index, "degree", item.degree, "text", "Bachelor of Computer Applications")}</label>
+        <label>College Name ${fieldInput("education", index, "college", item.college, "text", "College name")}</label>
+        <label>University ${fieldInput("education", index, "university", item.university, "text", "University name")}</label>
+        <label>CGPA / Percentage ${fieldInput("education", index, "score", item.score, "text", "8.5 CGPA / 85%")}</label>
+        <label>Start Year ${fieldInput("education", index, "startYear", item.startYear, "text", "2024")}</label>
+        <label>End Year ${fieldInput("education", index, "endYear", item.endYear, "text", "2027")}</label>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderProjects() {
+  const container = document.querySelector("#projectsList");
+  container.innerHTML = data.projects.map((item, index) => `
+    <div class="repeat-item">
+      <div class="repeat-item-header"><span>Project ${index + 1}</span>${removeButton("projects", index)}</div>
+      <div class="field-grid two">
+        <label>Project Title ${fieldInput("projects", index, "title", item.title, "text", "Weather App")}</label>
+        <label>Technologies Used ${fieldInput("projects", index, "technologies", item.technologies, "text", "HTML, CSS, JavaScript")}</label>
+        <label>GitHub Link ${fieldInput("projects", index, "github", item.github, "url", "https://github.com/user/project")}</label>
+        <label>Live Demo Link ${fieldInput("projects", index, "live", item.live, "url", "https://project-demo.com")}</label>
+        <label class="span-two">Description ${fieldInput("projects", index, "description", item.description, "textarea", "Write one responsibility or feature per line")}</label>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderExperience() {
+  const container = document.querySelector("#experienceList");
+  container.innerHTML = data.experience.map((item, index) => `
+    <div class="repeat-item">
+      <div class="repeat-item-header"><span>Experience ${index + 1}</span>${removeButton("experience", index)}</div>
+      <div class="field-grid two">
+        <label>Company Name ${fieldInput("experience", index, "company", item.company, "text", "Company name")}</label>
+        <label>Job Role ${fieldInput("experience", index, "role", item.role, "text", "Frontend Developer Intern")}</label>
+        <label class="span-two">Duration ${fieldInput("experience", index, "duration", item.duration, "text", "Jan 2026 - Mar 2026")}</label>
+        <label class="span-two">Responsibilities ${fieldInput("experience", index, "responsibilities", item.responsibilities, "textarea", "Write one responsibility per line")}</label>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderCertifications() {
+  const container = document.querySelector("#certificationsList");
+  container.innerHTML = data.certifications.map((item, index) => `
+    <div class="repeat-item">
+      <div class="repeat-item-header"><span>Certification ${index + 1}</span>${removeButton("certifications", index)}</div>
+      <div class="field-grid two">
+        <label>Certificate Name ${fieldInput("certifications", index, "name", item.name, "text", "Certificate name")}</label>
+        <label>Organization ${fieldInput("certifications", index, "organization", item.organization, "text", "Organization")}</label>
+        <label>Issue Date ${fieldInput("certifications", index, "issueDate", item.issueDate, "text", "June 2026")}</label>
+        <label>Credential URL ${fieldInput("certifications", index, "credentialUrl", item.credentialUrl, "url", "https://credential-url.com")}</label>
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderSkills() {
+  const container = document.querySelector("#skillsList");
+  container.innerHTML = Object.entries(skillLabels).map(([key, label]) => `
+    <div class="repeat-item skill-category">
+      <span class="field-label">${label}</span>
+      <div class="skill-input-row">
+        <input type="text" data-skill-input="${key}" placeholder="Add ${escapeHtml(label.toLowerCase())}">
+        <button class="secondary-button" type="button" data-add-skill="${key}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          Add
+        </button>
+      </div>
+      <div class="skill-tags">
+        ${(data.skills[key] || []).map((skill, index) => `
+          <span class="skill-tag">${escapeHtml(skill)}
+            <button type="button" data-remove-skill="${key}" data-index="${index}" aria-label="Remove ${escapeHtml(skill)}">x</button>
+          </span>
+        `).join("")}
+      </div>
+    </div>
+  `).join("");
+}
+
+function setThemeButtons() {
+  document.querySelectorAll(".theme-button").forEach((button) => {
+    const active = button.dataset.theme === data.theme;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+}
+
+function headerHtml() {
+  const personal = data.personal;
+  const contacts = [
+    personal.phone,
+    personal.email ? link(`mailto:${personal.email}`, personal.email) : "",
+    personal.address,
+    link(personal.linkedin, "LinkedIn"),
+    link(personal.github, "GitHub"),
+    link(personal.portfolio, "Portfolio")
+  ].filter(Boolean);
+
+  return `
+    <header class="resume-header">
+      <h1>${escapeHtml(personal.fullName || "Your Name")}</h1>
+      <div class="resume-contact">${contacts.map((item) => `<span>${item}</span>`).join("<span>|</span>")}</div>
+    </header>
+  `;
+}
+
+function section(title, body, extraClass = "") {
+  if (!body || !String(body).trim()) return "";
+  return `<section class="resume-section ${extraClass}"><h2>${escapeHtml(title)}</h2>${body}</section>`;
+}
+
+function summaryHtml(title = "Professional Summary") {
+  const body = sanitizeRichText(data.summary);
+  return section(title, body || `<p class="empty-hint">Add a short summary to introduce your profile.</p>`);
+}
+
+function educationHtml(timeline = false) {
+  const entries = data.education
+    .filter((item) => isFilled(item.degree) || isFilled(item.college) || isFilled(item.university))
+    .map((item) => {
+      const place = compact([item.college, item.university]);
+      const duration = compact([item.startYear, item.endYear]);
+      return `
+        <div class="resume-entry ${timeline ? "timeline-entry" : ""}">
+          <div class="resume-entry-head">
+            <span>${escapeHtml(item.degree || "Degree")}${item.score ? `, ${escapeHtml(item.score)}` : ""}</span>
+            <span>${escapeHtml(duration)}</span>
+          </div>
+          <div class="resume-entry-sub"><span>${escapeHtml(place)}</span></div>
+        </div>
+      `;
+    }).join("");
+  return section("Education", entries);
+}
+
+function projectHtml() {
+  const entries = data.projects
+    .filter((item) => isFilled(item.title) || isFilled(item.description))
+    .map((item) => {
+      const links = compact([link(item.github, "GitHub"), link(item.live, "Live Demo")]);
+      return `
+        <div class="resume-entry">
+          <div class="resume-entry-head">
+            <span>${escapeHtml(item.title || "Project Title")}${item.technologies ? ` | ${escapeHtml(item.technologies)}` : ""}</span>
+            <span>${links}</span>
+          </div>
+          ${listFromText(item.description)}
+        </div>
+      `;
+    }).join("");
+  return section("Projects", entries);
+}
+
+function experienceHtml() {
+  const entries = data.experience
+    .filter((item) => isFilled(item.company) || isFilled(item.role) || isFilled(item.responsibilities))
+    .map((item) => `
+      <div class="resume-entry">
+        <div class="resume-entry-head">
+          <span>${escapeHtml(item.role || "Job Role")}</span>
+          <span>${escapeHtml(item.duration || "")}</span>
+        </div>
+        <div class="resume-entry-sub"><span>${escapeHtml(item.company || "Company Name")}</span></div>
+        ${listFromText(item.responsibilities)}
+      </div>
+    `).join("");
+  return section("Experience", entries);
+}
+
+function certificationHtml() {
+  const entries = data.certifications
+    .filter((item) => isFilled(item.name) || isFilled(item.organization))
+    .map((item) => `
+      <div class="resume-entry">
+        <div class="resume-entry-head">
+          <span>${escapeHtml(item.name || "Certificate")}</span>
+          <span>${escapeHtml(item.issueDate || "")}</span>
+        </div>
+        <div class="resume-entry-sub">
+          <span>${escapeHtml(item.organization || "")}</span>
+          <span>${link(item.credentialUrl, "Credential")}</span>
+        </div>
+      </div>
+    `).join("");
+  return section("Certifications", entries);
+}
+
+function skillsHtml(mode = "plain") {
+  const rows = Object.entries(skillLabels)
+    .filter(([key]) => (data.skills[key] || []).length)
+    .map(([key, label], categoryIndex) => {
+      const skills = data.skills[key] || [];
+      if (mode === "bars") {
+        return skills.slice(0, 8).map((skill, skillIndex) => `
+          <div class="skill-bar">
+            <strong>${escapeHtml(skill)}</strong>
+            <span style="--level: ${Math.max(58, 92 - (categoryIndex + skillIndex) * 5)}%"></span>
+          </div>
+        `).join("");
+      }
+      return `<div><strong>${escapeHtml(label)}:</strong> ${escapeHtml(skills.join(", "))}</div>`;
+    }).join("");
+  return section("Technical Skills", `<div class="resume-skills">${rows}</div>`);
+}
+
+function achievementsHtml() {
+  const entries = [
+    ["Awards", data.achievements.awards],
+    ["Hackathons", data.achievements.hackathons],
+    ["Competitions", data.achievements.competitions],
+    ["Academic Achievements", data.achievements.academic]
+  ].filter(([, value]) => isFilled(value)).map(([label, value]) => `<li><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</li>`).join("");
+
+  return section("Achievements", entries ? `<ul>${entries}</ul>` : "");
+}
+
+function renderProfessional() {
+  return [
+    headerHtml(),
+    summaryHtml("Professional Summary"),
+    educationHtml(),
+    projectHtml(),
+    experienceHtml(),
+    certificationHtml(),
+    achievementsHtml(),
+    skillsHtml()
+  ].join("");
+}
+
+function renderStudent() {
+  return [
+    headerHtml(),
+    summaryHtml("Career Objective"),
+    skillsHtml(),
+    educationHtml(true),
+    projectHtml(),
+    certificationHtml(),
+    achievementsHtml()
+  ].join("");
+}
+
+function renderModern() {
+  return `
+    <aside class="resume-sidebar-col">
+      ${headerHtml()}
+      ${skillsHtml("bars")}
+      ${certificationHtml()}
+    </aside>
+    <main class="resume-main-col">
+      ${summaryHtml("Profile")}
+      ${experienceHtml()}
+      ${projectHtml()}
+      ${educationHtml()}
+      ${achievementsHtml()}
+    </main>
+  `;
+}
+
+function renderMinimal() {
+  return [
+    headerHtml(),
+    summaryHtml("Summary"),
+    skillsHtml(),
+    experienceHtml(),
+    projectHtml(),
+    educationHtml(),
+    certificationHtml(),
+    achievementsHtml()
+  ].join("");
+}
+
+function renderCreative() {
+  return [
+    headerHtml(),
+    summaryHtml("About Me"),
+    experienceHtml(),
+    projectHtml(),
+    skillsHtml(),
+    educationHtml(),
+    certificationHtml(),
+    achievementsHtml()
+  ].join("");
+}
+
+function render() {
+  const template = data.template || "professional";
+  preview.className = `resume-paper ${template}`;
+  const renderer = {
+    professional: renderProfessional,
+    student: renderStudent,
+    modern: renderModern,
+    minimal: renderMinimal,
+    creative: renderCreative
+  }[template] || renderProfessional;
+
+  preview.innerHTML = renderer();
+  updateSummaryCount();
+}
+
+function updateSummaryCount() {
+  summaryCount.textContent = String(plainText(data.summary).length);
+}
+
+function updateCompletion() {
+  const checks = [
+    data.personal.fullName,
+    data.personal.email,
+    data.personal.phone,
+    data.personal.address,
+    plainText(data.summary),
+    data.education.some((item) => isFilled(item.degree) && isFilled(item.college)),
+    Object.values(data.skills).some((items) => items.length),
+    data.projects.some((item) => isFilled(item.title)),
+    data.experience.some((item) => isFilled(item.company) || isFilled(item.role)),
+    data.certifications.some((item) => isFilled(item.name)),
+    Object.values(data.achievements).some(isFilled)
+  ];
+  const score = Math.round((checks.filter(Boolean).length / checks.length) * 100);
+  completionBar.style.width = `${score}%`;
+  completionText.textContent = `${score}%`;
+}
+
+function validateField(input) {
+  if (!(input instanceof HTMLInputElement)) return true;
+  const valid = input.checkValidity();
+  input.classList.toggle("invalid", !valid);
+  return valid;
+}
+
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2500);
+}
+
+function addItem(section) {
+  const blank = {
+    education: { degree: "", college: "", university: "", startYear: "", endYear: "", score: "" },
+    projects: { title: "", description: "", technologies: "", github: "", live: "" },
+    experience: { company: "", role: "", duration: "", responsibilities: "" },
+    certifications: { name: "", organization: "", issueDate: "", credentialUrl: "" }
+  };
+  data[section].push({ ...blank[section] });
+  renderRepeaters();
+  render();
+  updateCompletion();
+  scheduleSave();
+}
+
+function removeItem(section, index) {
+  data[section].splice(Number(index), 1);
+  if (!data[section].length) addItem(section);
+  renderRepeaters();
+  render();
+  updateCompletion();
+  scheduleSave();
+}
+
+form.addEventListener("input", (event) => {
+  const target = event.target;
+
+  if (target.matches("[data-field]")) {
+    setValue(target.dataset.field, target.value);
+    validateField(target);
+  }
+
+  if (target.matches("[data-section]")) {
+    const { section, index, key } = target.dataset;
+    data[section][Number(index)][key] = target.value;
+    validateField(target);
+  }
+
+  render();
+  updateCompletion();
+  scheduleSave();
+});
+
+form.addEventListener("click", (event) => {
+  const addButton = event.target.closest("[data-add]");
+  const remove = event.target.closest("[data-remove]");
+  const addSkill = event.target.closest("[data-add-skill]");
+  const removeSkill = event.target.closest("[data-remove-skill]");
+  const command = event.target.closest("[data-command]");
+
+  if (addButton) addItem(addButton.dataset.add);
+  if (remove) removeItem(remove.dataset.remove, remove.dataset.index);
+
+  if (addSkill) {
+    const key = addSkill.dataset.addSkill;
+    const input = document.querySelector(`[data-skill-input="${key}"]`);
+    const value = input.value.trim();
+    if (value && !data.skills[key].includes(value)) data.skills[key].push(value);
+    input.value = "";
+    renderSkills();
+    render();
+    updateCompletion();
+    scheduleSave();
+  }
+
+  if (removeSkill) {
+    const key = removeSkill.dataset.removeSkill;
+    data.skills[key].splice(Number(removeSkill.dataset.index), 1);
+    renderSkills();
+    render();
+    updateCompletion();
+    scheduleSave();
+  }
+
+  if (command) {
+    document.execCommand(command.dataset.command, false);
+    summaryEditor.focus();
+    data.summary = summaryEditor.innerHTML;
+    render();
+    scheduleSave();
+  }
+});
+
+form.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+  const input = event.target.closest("[data-skill-input]");
+  if (!input) return;
+  event.preventDefault();
+  document.querySelector(`[data-add-skill="${input.dataset.skillInput}"]`).click();
+});
+
+summaryEditor.addEventListener("input", () => {
+  if (plainText(summaryEditor.innerHTML).length > 700) {
+    const selection = window.getSelection();
+    summaryEditor.innerHTML = summaryEditor.innerHTML.slice(0, 900);
+    selection.collapse(summaryEditor, summaryEditor.childNodes.length);
+  }
+  data.summary = summaryEditor.innerHTML;
+  render();
+  updateCompletion();
+  scheduleSave();
+});
+
+templateSelect.addEventListener("change", () => {
+  data.template = templateSelect.value;
+  render();
+  scheduleSave();
+});
+
+document.querySelectorAll(".theme-button").forEach((button) => {
+  button.addEventListener("click", () => {
+    data.theme = button.dataset.theme;
+    document.body.classList.toggle("dark", data.theme === "dark");
+    setThemeButtons();
+    scheduleSave();
+  });
+});
+
+document.querySelector("#downloadPdf").addEventListener("click", () => {
+  const required = [...document.querySelectorAll("input[required]")];
+  const valid = required.every(validateField);
+  if (!valid) {
+    showToast("Please complete the required personal information first.");
+    return;
+  }
+  saveStatus.textContent = "Ready for PDF";
+  window.print();
+});
+
+document.querySelector("#previewToggle").addEventListener("click", () => {
+  document.body.classList.toggle("preview-only");
+});
+
+document.querySelector("#loadSample").addEventListener("click", () => {
+  data = clone(sampleData);
+  document.body.classList.remove("preview-only");
+  init();
+  showToast("Sample resume loaded.");
+});
+
+document.querySelectorAll(".nav-link").forEach((linkEl) => {
+  linkEl.addEventListener("click", () => {
+    document.querySelectorAll(".nav-link").forEach((item) => item.classList.remove("active"));
+    linkEl.classList.add("active");
+  });
+});
+
+window.addEventListener("beforeprint", () => {
+  document.body.classList.add("printing");
+});
+
+window.addEventListener("afterprint", () => {
+  document.body.classList.remove("printing");
+});
+
+init();

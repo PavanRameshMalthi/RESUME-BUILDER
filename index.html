@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Builder</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="#personal" aria-label="Resume Builder home">
+      <span class="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
+      </span>
+      <span>Resume Builder</span>
+    </a>
+
+    <div class="header-actions">
+      <div class="theme-switch" role="group" aria-label="Theme">
+        <button class="theme-button active" type="button" data-theme="light" aria-pressed="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          Light
+        </button>
+        <button class="theme-button" type="button" data-theme="dark" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 7.7A9 9 0 1 1 12 3Z"/></svg>
+          Dark
+        </button>
+      </div>
+
+      <label class="template-control" for="templateSelect">
+        <span>Template:</span>
+        <select id="templateSelect">
+          <option value="professional">Professional</option>
+          <option value="student">Student</option>
+          <option value="modern">Modern</option>
+          <option value="minimal">Minimal</option>
+          <option value="creative">Creative</option>
+        </select>
+      </label>
+
+      <button class="ghost-button" type="button" id="previewToggle">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        Preview
+      </button>
+      <button class="primary-button" type="button" id="downloadPdf">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        Download PDF
+      </button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="sidebar" aria-label="Resume sections">
+      <nav class="section-nav">
+        <a class="nav-link active" href="#personal">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21a7 7 0 0 0-14 0"/><circle cx="12" cy="7" r="4"/></svg>
+          Personal Info
+        </a>
+        <a class="nav-link" href="#summary">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>
+          Summary
+        </a>
+        <a class="nav-link" href="#education">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m22 10-10-5-10 5 10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>
+          Education
+        </a>
+        <a class="nav-link" href="#skills">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.9 6.1 6.7.9-4.8 4.7 1.2 6.6-6-3.2-6 3.2 1.2-6.6L2.4 9l6.7-.9Z"/></svg>
+          Skills
+        </a>
+        <a class="nav-link" href="#projects">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg>
+          Projects
+        </a>
+        <a class="nav-link" href="#experience">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg>
+          Experience
+        </a>
+        <a class="nav-link" href="#certifications">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5"/></svg>
+          Certifications
+        </a>
+        <a class="nav-link" href="#achievements">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v7a5 5 0 0 1-10 0Z"/><path d="M5 5H3v3a4 4 0 0 0 4 4"/><path d="M19 5h2v3a4 4 0 0 1-4 4"/></svg>
+          Achievements
+        </a>
+      </nav>
+
+      <div class="tips">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5A6 6 0 1 1 15.5 14c-.8.5-1.5 1.4-1.5 2.3v.7h-4v-.7c0-.8-.6-1.4-1.5-1.8Z"/></svg>
+        <strong>Tips</strong>
+        <p>Fill all sections to create a polished resume.</p>
+        <div class="progress-track"><span id="completionBar"></span></div>
+        <small><span id="completionText">0%</span> Completed</small>
+      </div>
+    </aside>
+
+    <section class="form-pane" aria-label="Resume form">
+      <form id="resumeForm" novalidate>
+        <section class="panel" id="personal">
+          <div class="panel-title">
+            <h2>Personal Information</h2>
+            <button class="secondary-button" type="button" id="loadSample">Load Sample</button>
+          </div>
+          <div class="field-grid two">
+            <label>Full Name <input data-field="personal.fullName" name="fullName" required placeholder="Pavan Ramesh Malthi"></label>
+            <label>Email Address <input data-field="personal.email" name="email" type="email" required placeholder="name@email.com"></label>
+            <label>Phone Number <input data-field="personal.phone" name="phone" required pattern="[0-9+() -]{7,}" placeholder="+91 6281443691"></label>
+            <label>Address <input data-field="personal.address" placeholder="Andhra Pradesh, India"></label>
+            <label>LinkedIn Profile <input data-field="personal.linkedin" type="url" placeholder="https://linkedin.com/in/username"></label>
+            <label>GitHub Profile <input data-field="personal.github" type="url" placeholder="https://github.com/username"></label>
+            <label class="span-two">Portfolio Website <input data-field="personal.portfolio" type="url" placeholder="https://yourportfolio.com"></label>
+          </div>
+        </section>
+
+        <section class="panel" id="summary">
+          <div class="panel-title">
+            <h2>Professional Summary / Career Objective</h2>
+            <span class="counter"><span id="summaryCount">0</span>/700</span>
+          </div>
+          <div class="rich-toolbar" aria-label="Summary formatting">
+            <button type="button" data-command="bold"><strong>B</strong></button>
+            <button type="button" data-command="italic"><em>I</em></button>
+            <button type="button" data-command="insertUnorderedList">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
+            </button>
+          </div>
+          <div class="rich-editor" id="summaryEditor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Write a concise summary or career objective..."></div>
+        </section>
+
+        <section class="panel" id="education">
+          <div class="panel-title">
+            <h2>Education</h2>
+            <button class="secondary-button" type="button" data-add="education">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              Add Education
+            </button>
+          </div>
+          <div class="repeat-list" id="educationList"></div>
+        </section>
+
+        <section class="panel" id="skills">
+          <div class="panel-title">
+            <h2>Technical Skills</h2>
+          </div>
+          <div class="skill-grid" id="skillsList"></div>
+        </section>
+
+        <section class="panel" id="projects">
+          <div class="panel-title">
+            <h2>Projects</h2>
+            <button class="secondary-button" type="button" data-add="projects">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              Add Project
+            </button>
+          </div>
+          <div class="repeat-list" id="projectsList"></div>
+        </section>
+
+        <section class="panel" id="experience">
+          <div class="panel-title">
+            <h2>Experience</h2>
+            <button class="secondary-button" type="button" data-add="experience">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              Add Experience
+            </button>
+          </div>
+          <div class="repeat-list" id="experienceList"></div>
+        </section>
+
+        <section class="panel" id="certifications">
+          <div class="panel-title">
+            <h2>Certifications</h2>
+            <button class="secondary-button" type="button" data-add="certifications">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              Add Certification
+            </button>
+          </div>
+          <div class="repeat-list" id="certificationsList"></div>
+        </section>
+
+        <section class="panel" id="achievements">
+          <div class="panel-title">
+            <h2>Achievements</h2>
+          </div>
+          <div class="field-grid two">
+            <label>Awards <textarea data-field="achievements.awards" placeholder="Winner, coding challenge..."></textarea></label>
+            <label>Hackathons <textarea data-field="achievements.hackathons" placeholder="Finalist, Smart India Hackathon..."></textarea></label>
+            <label>Competitions <textarea data-field="achievements.competitions" placeholder="Participated in..."></textarea></label>
+            <label>Academic Achievements <textarea data-field="achievements.academic" placeholder="College topper, merit scholarship..."></textarea></label>
+          </div>
+        </section>
+      </form>
+    </section>
+
+    <section class="preview-pane" id="previewPane" aria-label="Live resume preview">
+      <div class="preview-toolbar">
+        <strong>Live Preview</strong>
+        <span id="saveStatus">Saved</span>
+      </div>
+      <article class="resume-paper professional" id="resumePreview" aria-live="polite"></article>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
