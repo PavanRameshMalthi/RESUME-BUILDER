@@ -257,8 +257,8 @@ function renderEducation() {
         <label>College Name ${fieldInput("education", index, "college", item.college, "text", "Enter college name")}</label>
         <label>University ${fieldInput("education", index, "university", item.university, "text", "Enter university name")}</label>
         <label>CGPA / Percentage ${fieldInput("education", index, "score", item.score, "text", "Enter CGPA / percentage")}</label>
-        <label>Start Year ${fieldInput("education", index, "startYear", item.startYear, "text", "Enter start year")}</label>
-        <label>End Year ${fieldInput("education", index, "endYear", item.endYear, "text", "Enter end year")}</label>
+        <label>Start Year ${fieldInput("education", index, "startYear", item.startYear, "number", "Enter start year")}</label>
+        <label>End Year ${fieldInput("education", index, "endYear", item.endYear, "number", "Enter end year")}</label>
       </div>
     </div>
   `).join("");
@@ -621,7 +621,7 @@ function addItem(section) {
 function removeItem(section, index) {
   if (!confirm("Delete this item?")) return;
   data[section].splice(Number(index), 1);
-  if (!data[section].length) addItem(section);
+  if (!data[section].length) { addItem(section); return; }
   renderRepeaters();
   render();
   updateCompletion();
@@ -661,7 +661,8 @@ form.addEventListener("click", (event) => {
     const key = addSkill.dataset.addSkill;
     const input = document.querySelector(`[data-skill-input="${key}"]`);
     const value = input.value.trim();
-    if (value && !data.skills[key].includes(value)) data.skills[key].push(value);
+    const exists=data.skills[key].some(skill=>skill.toLowerCase()===value.toLowerCase());
+    if(value && !exists) data.skills[key].push(value);
     input.value = "";
     renderSkills();
     render();
@@ -679,7 +680,7 @@ form.addEventListener("click", (event) => {
   }
 
   if (command) {
-    showToast("Text formatting command executed. Consider upgrading to a modern editor library.");
+    document.execCommand(command.dataset.command,false,null);
     summaryEditor.focus();
     data.summary = summaryEditor.innerHTML;
     render();
@@ -696,10 +697,10 @@ form.addEventListener("keydown", (event) => {
 });
 
 summaryEditor.addEventListener("input", () => {
-  if (plainText(summaryEditor.innerHTML).length > 700) {
-    const selection = window.getSelection();
-    summaryEditor.innerHTML = summaryEditor.innerHTML.slice(0, 900);
-    selection.collapse(summaryEditor, summaryEditor.childNodes.length);
+  const txt=plainText(summaryEditor.innerHTML);
+  if (txt.length > 700) {
+    summaryEditor.innerText = txt.slice(0,700);
+    showToast("Maximum 700 characters allowed");
   }
   data.summary = summaryEditor.innerHTML;
   render();
@@ -726,13 +727,6 @@ document.querySelectorAll(".theme-button").forEach((button) => {
 
 document.querySelector("#previewToggle").addEventListener("click", () => {
   document.body.classList.toggle("preview-only");
-});
-
-document.querySelector("#loadSample").addEventListener("click", () => {
-  data = clone(sampleData);
-  document.body.classList.remove("preview-only");
-  init();
-  showToast("Sample resume loaded.");
 });
 
 document.querySelectorAll(".nav-link").forEach((linkEl) => {
@@ -774,7 +768,9 @@ function calculateATSScore(){
 const atsBtn=document.querySelector("#atsCheck");
 if(atsBtn){
  atsBtn.addEventListener("click",()=>{
-   const r=calculateATSScore(); alert(`ATS Score: ${r.score}/100\n\nMissing:\n${r.missing.join("\n")||"Nothing"}`);
+   const r=calculateATSScore();
+const ats=document.querySelector("#atsResult");
+ats.innerHTML=`<h3>ATS Score: ${r.score}/100</h3><p>Missing Items:</p><ul>${r.missing.length ? r.missing.map(m=>`<li>${m}</li>`).join("") : "<li>Nothing</li>"}</ul>`;
  });
 }
 
@@ -783,36 +779,22 @@ document.querySelector("#downloadPdf")?.addEventListener("click", async (e)=>{
  const required=[...document.querySelectorAll("input[required]")];
  const valid=required.every(validateField);
  if(!valid){showToast("Complete required fields."); return;}
- const canvas=await html2canvas(preview,{scale:2});
- const { jsPDF }=window.jspdf;
- const pdf=new jsPDF("p","mm","a4");
-
- const pageWidth=210;
- const pageHeight=297;
-
- const imgWidth=pageWidth;
- const imgHeight=(canvas.height*imgWidth)/canvas.width;
-
- let heightLeft=imgHeight;
- let position=0;
-
- const imgData=canvas.toDataURL("image/png");
-
- pdf.addImage(imgData,"PNG",0,position,imgWidth,imgHeight);
- heightLeft-=pageHeight;
-
- while(heightLeft>0){
-   position=heightLeft-imgHeight;
-   pdf.addPage();
-   pdf.addImage(imgData,"PNG",0,position,imgWidth,imgHeight);
-   heightLeft-=pageHeight;
+ if(window.html2pdf){
+   await html2pdf().set({
+     margin:10,
+     filename:"resume.pdf",
+     image:{type:"jpeg",quality:0.98},
+     html2canvas:{scale:2},
+     pagebreak:{mode:["avoid-all","css","legacy"]}
+   }).from(preview).save();
+ }else{
+   showToast("PDF library failed to load.");
  }
-
- pdf.save("resume.pdf");
 });
 
 
 document.querySelector("#loadSample")?.addEventListener("click", () => {
+data = clone(sampleData);
 data.personal={
 fullName:"John Doe",
 email:"john.doe@gmail.com",
@@ -872,7 +854,7 @@ academic:"Dean's List"
 };
 
 init();
-showToast("Sample data loaded successfully.");
+scheduleSave(); showToast("Sample data loaded successfully.");
 });
 
 document.addEventListener("input",(e)=>{
