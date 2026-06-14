@@ -1,5 +1,5 @@
 const STORAGE_KEY = "resumeBuilderDataV3";
-const SAVE_DELAY = 220;
+const SAVE_DELAY = 1000;
 
 const skillLabels = {
   programming: "Programming Languages",
@@ -13,10 +13,10 @@ const sampleData = {
   theme: "light",
   template: "professional",
   personal: {
-    fullName: "",
-    email: "",
-    phone: "",
-    address: "",
+    fullName: "John Doe",
+    email: "john@example.com",
+    phone: "+91 9876543210",
+    address: "Hyderabad, India",
     linkedin: "",
     github: "",
     portfolio: ""
@@ -138,7 +138,7 @@ function setValue(path, value) {
     target[part] = target[part] || {};
     target = target[part];
   });
-  target[parts.at(-1)] = value;
+  target[parts[parts.length - 1]] = value;
 }
 
 function escapeHtml(value = "") {
@@ -257,8 +257,8 @@ function renderEducation() {
         <label>College Name ${fieldInput("education", index, "college", item.college, "text", "Enter college name")}</label>
         <label>University ${fieldInput("education", index, "university", item.university, "text", "Enter university name")}</label>
         <label>CGPA / Percentage ${fieldInput("education", index, "score", item.score, "text", "Enter CGPA / percentage")}</label>
-        <label>Start Year ${fieldInput("education", index, "startYear", item.startYear, "text", "Enter start year")}</label>
-        <label>End Year ${fieldInput("education", index, "endYear", item.endYear, "text", "Enter end year")}</label>
+        <label>Start Year ${fieldInput("education", index, "startYear", item.startYear, "number", "Enter start year")}</label>
+        <label>End Year ${fieldInput("education", index, "endYear", item.endYear, "number", "Enter end year")}</label>
       </div>
     </div>
   `).join("");
@@ -303,7 +303,7 @@ function renderCertifications() {
       <div class="field-grid two">
         <label>Certificate Name ${fieldInput("certifications", index, "name", item.name, "text", "Enter certificate name")}</label>
         <label>Organization ${fieldInput("certifications", index, "organization", item.organization, "text", "Enter organization")}</label>
-        <label>Issue Date ${fieldInput("certifications", index, "issueDate", item.issueDate, "text", "Enter issue date")}</label>
+        <label>Issue Date ${fieldInput("certifications", index, "issueDate", item.issueDate, "date", "Enter issue date")}</label>
         <label>Credential URL ${fieldInput("certifications", index, "credentialUrl", item.credentialUrl, "url", "Enter credential URL")}</label>
       </div>
     </div>
@@ -661,7 +661,7 @@ form.addEventListener("click", (event) => {
     const key = addSkill.dataset.addSkill;
     const input = document.querySelector(`[data-skill-input="${key}"]`);
     const value = input.value.trim();
-    if (value && !data.skills[key].includes(value)) data.skills[key].push(value);
+    if (value && !data.skills[key].some(s => s.toLowerCase() === value.toLowerCase())) data.skills[key].push(value);
     input.value = "";
     renderSkills();
     render();
@@ -671,7 +671,7 @@ form.addEventListener("click", (event) => {
 
   if (removeSkill) {
     const key = removeSkill.dataset.removeSkill;
-    data.skills[key].splice(Number(removeSkill.dataset.index), 1);
+    if(confirm("Remove skill?")) data.skills[key].splice(Number(removeSkill.dataset.index), 1);
     renderSkills();
     render();
     updateCompletion();
@@ -696,10 +696,9 @@ form.addEventListener("keydown", (event) => {
 });
 
 summaryEditor.addEventListener("input", () => {
-  if (plainText(summaryEditor.innerHTML).length > 700) {
-    const selection = window.getSelection();
-    summaryEditor.innerHTML = summaryEditor.innerHTML.slice(0, 900);
-    selection.collapse(summaryEditor, summaryEditor.childNodes.length);
+  const text = plainText(summaryEditor.innerHTML);
+  if (text.length > 700) {
+    summaryEditor.innerText = text.substring(0,700);
   }
   data.summary = summaryEditor.innerHTML;
   render();
@@ -730,7 +729,15 @@ document.querySelector("#downloadPdf").addEventListener("click", () => {
     return;
   }
   saveStatus.textContent = "Ready for PDF";
-  window.print();
+  html2canvas(preview,{scale:2}).then(canvas=>{
+const { jsPDF } = window.jspdf;
+const pdf = new jsPDF("p","mm","a4");
+const img=canvas.toDataURL("image/png");
+const width=210;
+const height=(canvas.height*width)/canvas.width;
+pdf.addImage(img,"PNG",0,0,width,height);
+pdf.save("resume.pdf");
+});
 });
 
 document.querySelector("#previewToggle").addEventListener("click", () => {
@@ -760,3 +767,16 @@ window.addEventListener("afterprint", () => {
 });
 
 init();
+
+const sections=document.querySelectorAll('.panel');
+const navLinks=document.querySelectorAll('.nav-link');
+const observer=new IntersectionObserver(entries=>{
+entries.forEach(entry=>{
+if(entry.isIntersecting){
+navLinks.forEach(n=>n.classList.remove('active'));
+const active=document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+if(active) active.classList.add('active');
+}
+});
+},{threshold:0.4});
+sections.forEach(s=>observer.observe(s));
