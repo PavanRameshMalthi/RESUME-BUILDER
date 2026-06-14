@@ -69,7 +69,8 @@ const sampleData = {
     hackathons: "",
     competitions: "",
     academic: ""
-  }};
+  }
+};
 
 let data = mergeData(sampleData, loadData());
 let saveTimer = null;
@@ -117,8 +118,12 @@ function scheduleSave() {
   clearTimeout(saveTimer);
   saveStatus.textContent = "Saving...";
   saveTimer = setTimeout(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    saveStatus.textContent = "Saved";
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      saveStatus.textContent = "Saved";
+    } catch (err) {
+      saveStatus.textContent = "Save Failed";
+    }
   }, SAVE_DELAY);
 }
 
@@ -520,6 +525,20 @@ function renderMinimal() {
   ].join("");
 }
 
+
+function renderATS() {
+  return [
+    headerHtml(),
+    summaryHtml("Professional Summary"),
+    skillsHtml(),
+    experienceHtml(),
+    educationHtml(),
+    projectHtml(),
+    certificationHtml(),
+    achievementsHtml()
+  ].join("");
+}
+
 function renderCreative() {
   return [
     headerHtml(),
@@ -541,7 +560,8 @@ function render() {
     student: renderStudent,
     modern: renderModern,
     minimal: renderMinimal,
-    creative: renderCreative
+    creative: renderCreative,
+    ats: renderATS
   }[template] || renderProfessional;
 
   preview.innerHTML = renderer();
@@ -599,6 +619,7 @@ function addItem(section) {
 }
 
 function removeItem(section, index) {
+  if (!confirm("Delete this item?")) return;
   data[section].splice(Number(index), 1);
   if (!data[section].length) addItem(section);
   renderRepeaters();
