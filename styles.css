@@ -948,3 +948,41 @@ body.preview-only .preview-pane {
     margin: 0;
   }
 }
+
+
+/* Mobile-first improvements */
+@media (max-width:600px){
+  .app-shell{padding:8px;}
+  .panel{padding:12px;}
+  .resume-paper{
+    width:100%;
+    padding:16px;
+    font-size:13px;
+  }
+  .resume-entry-head,
+  .resume-entry-sub{
+    flex-direction:column;
+    gap:4px;
+  }
+  .header-actions{
+    display:flex;
+    flex-direction:column;
+  }
+  button,select,input,textarea{
+    min-height:48px;
+  }
+}
+
+
+/* Improved mobile navigation */
+@media (max-width:600px){
+ .section-nav{
+   display:flex;
+   overflow-x:auto;
+   white-space:nowrap;
+   gap:8px;
+ }
+ .nav-link{
+   flex:0 0 auto;
+ }
+}

@@ -1,5 +1,5 @@
 const STORAGE_KEY = "resumeBuilderDataV3";
-const SAVE_DELAY = 1000;
+const SAVE_DELAY = 220;
 
 const skillLabels = {
   programming: "Programming Languages",
@@ -10,13 +10,13 @@ const skillLabels = {
 };
 
 const sampleData = {
-  theme: "light",
+  theme: "dark",
   template: "professional",
   personal: {
-    fullName: "John Doe",
-    email: "john@example.com",
-    phone: "+91 9876543210",
-    address: "Hyderabad, India",
+    fullName: "",
+    email: "",
+    phone: "",
+    address: "",
     linkedin: "",
     github: "",
     portfolio: ""
@@ -138,7 +138,7 @@ function setValue(path, value) {
     target[part] = target[part] || {};
     target = target[part];
   });
-  target[parts[parts.length - 1]] = value;
+  target[parts.at(-1)] = value;
 }
 
 function escapeHtml(value = "") {
@@ -257,8 +257,8 @@ function renderEducation() {
         <label>College Name ${fieldInput("education", index, "college", item.college, "text", "Enter college name")}</label>
         <label>University ${fieldInput("education", index, "university", item.university, "text", "Enter university name")}</label>
         <label>CGPA / Percentage ${fieldInput("education", index, "score", item.score, "text", "Enter CGPA / percentage")}</label>
-        <label>Start Year ${fieldInput("education", index, "startYear", item.startYear, "number", "Enter start year")}</label>
-        <label>End Year ${fieldInput("education", index, "endYear", item.endYear, "number", "Enter end year")}</label>
+        <label>Start Year ${fieldInput("education", index, "startYear", item.startYear, "text", "Enter start year")}</label>
+        <label>End Year ${fieldInput("education", index, "endYear", item.endYear, "text", "Enter end year")}</label>
       </div>
     </div>
   `).join("");
@@ -303,7 +303,7 @@ function renderCertifications() {
       <div class="field-grid two">
         <label>Certificate Name ${fieldInput("certifications", index, "name", item.name, "text", "Enter certificate name")}</label>
         <label>Organization ${fieldInput("certifications", index, "organization", item.organization, "text", "Enter organization")}</label>
-        <label>Issue Date ${fieldInput("certifications", index, "issueDate", item.issueDate, "date", "Enter issue date")}</label>
+        <label>Issue Date ${fieldInput("certifications", index, "issueDate", item.issueDate, "text", "Enter issue date")}</label>
         <label>Credential URL ${fieldInput("certifications", index, "credentialUrl", item.credentialUrl, "url", "Enter credential URL")}</label>
       </div>
     </div>
@@ -661,7 +661,7 @@ form.addEventListener("click", (event) => {
     const key = addSkill.dataset.addSkill;
     const input = document.querySelector(`[data-skill-input="${key}"]`);
     const value = input.value.trim();
-    if (value && !data.skills[key].some(s => s.toLowerCase() === value.toLowerCase())) data.skills[key].push(value);
+    if (value && !data.skills[key].includes(value)) data.skills[key].push(value);
     input.value = "";
     renderSkills();
     render();
@@ -671,7 +671,7 @@ form.addEventListener("click", (event) => {
 
   if (removeSkill) {
     const key = removeSkill.dataset.removeSkill;
-    if(confirm("Remove skill?")) data.skills[key].splice(Number(removeSkill.dataset.index), 1);
+    data.skills[key].splice(Number(removeSkill.dataset.index), 1);
     renderSkills();
     render();
     updateCompletion();
@@ -679,7 +679,7 @@ form.addEventListener("click", (event) => {
   }
 
   if (command) {
-    document.execCommand(command.dataset.command, false);
+    showToast("Text formatting command executed. Consider upgrading to a modern editor library.");
     summaryEditor.focus();
     data.summary = summaryEditor.innerHTML;
     render();
@@ -696,9 +696,10 @@ form.addEventListener("keydown", (event) => {
 });
 
 summaryEditor.addEventListener("input", () => {
-  const text = plainText(summaryEditor.innerHTML);
-  if (text.length > 700) {
-    summaryEditor.innerText = text.substring(0,700);
+  if (plainText(summaryEditor.innerHTML).length > 700) {
+    const selection = window.getSelection();
+    summaryEditor.innerHTML = summaryEditor.innerHTML.slice(0, 900);
+    selection.collapse(summaryEditor, summaryEditor.childNodes.length);
   }
   data.summary = summaryEditor.innerHTML;
   render();
@@ -721,24 +722,7 @@ document.querySelectorAll(".theme-button").forEach((button) => {
   });
 });
 
-document.querySelector("#downloadPdf").addEventListener("click", () => {
-  const required = [...document.querySelectorAll("input[required]")];
-  const valid = required.every(validateField);
-  if (!valid) {
-    showToast("Please complete the required personal information first.");
-    return;
-  }
-  saveStatus.textContent = "Ready for PDF";
-  html2canvas(preview,{scale:2}).then(canvas=>{
-const { jsPDF } = window.jspdf;
-const pdf = new jsPDF("p","mm","a4");
-const img=canvas.toDataURL("image/png");
-const width=210;
-const height=(canvas.height*width)/canvas.width;
-pdf.addImage(img,"PNG",0,0,width,height);
-pdf.save("resume.pdf");
-});
-});
+// removed legacy print handler
 
 document.querySelector("#previewToggle").addEventListener("click", () => {
   document.body.classList.toggle("preview-only");
@@ -768,15 +752,143 @@ window.addEventListener("afterprint", () => {
 
 init();
 
-const sections=document.querySelectorAll('.panel');
-const navLinks=document.querySelectorAll('.nav-link');
-const observer=new IntersectionObserver(entries=>{
-entries.forEach(entry=>{
-if(entry.isIntersecting){
-navLinks.forEach(n=>n.classList.remove('active'));
-const active=document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
-if(active) active.classList.add('active');
+
+
+function calculateATSScore(){
+ let score=0;
+ const missing=[];
+
+ if(data.personal.fullName) score+=10; else missing.push("Full Name");
+ if(data.personal.email) score+=10; else missing.push("Email");
+ if(data.personal.phone) score+=10; else missing.push("Phone");
+ if(plainText(data.summary).length>=100) score+=15; else missing.push("Summary (100+ chars)");
+ if(data.education.some(e=>e.degree)) score+=15; else missing.push("Education");
+ if(Object.values(data.skills).flat().length>=5) score+=15; else missing.push("At least 5 Skills");
+ if(data.projects.some(p=>p.title && p.description)) score+=15; else missing.push("Project with Description");
+ if(data.experience.some(e=>e.company||e.role)) score+=10; else missing.push("Experience");
+
+ return {score:Math.min(score,100), missing};
+}
+
+
+const atsBtn=document.querySelector("#atsCheck");
+if(atsBtn){
+ atsBtn.addEventListener("click",()=>{
+   const r=calculateATSScore(); alert(`ATS Score: ${r.score}/100\n\nMissing:\n${r.missing.join("\n")||"Nothing"}`);
+ });
+}
+
+document.querySelector("#downloadPdf")?.addEventListener("click", async (e)=>{
+ e.preventDefault();
+ const required=[...document.querySelectorAll("input[required]")];
+ const valid=required.every(validateField);
+ if(!valid){showToast("Complete required fields."); return;}
+ const canvas=await html2canvas(preview,{scale:2});
+ const { jsPDF }=window.jspdf;
+ const pdf=new jsPDF("p","mm","a4");
+
+ const pageWidth=210;
+ const pageHeight=297;
+
+ const imgWidth=pageWidth;
+ const imgHeight=(canvas.height*imgWidth)/canvas.width;
+
+ let heightLeft=imgHeight;
+ let position=0;
+
+ const imgData=canvas.toDataURL("image/png");
+
+ pdf.addImage(imgData,"PNG",0,position,imgWidth,imgHeight);
+ heightLeft-=pageHeight;
+
+ while(heightLeft>0){
+   position=heightLeft-imgHeight;
+   pdf.addPage();
+   pdf.addImage(imgData,"PNG",0,position,imgWidth,imgHeight);
+   heightLeft-=pageHeight;
+ }
+
+ pdf.save("resume.pdf");
+});
+
+
+document.querySelector("#loadSample")?.addEventListener("click", () => {
+data.personal={
+fullName:"John Doe",
+email:"john.doe@gmail.com",
+phone:"+91 9876543210",
+address:"Hyderabad, India",
+linkedin:"https://linkedin.com/in/johndoe",
+github:"https://github.com/johndoe",
+portfolio:"https://johndoe.dev"
+};
+
+data.summary="Motivated Full Stack Developer skilled in HTML, CSS, JavaScript, React, Node.js and MongoDB with experience building responsive web applications.";
+
+data.education=[{
+degree:"B.Tech Computer Science",
+college:"ABC Engineering College",
+university:"JNTU",
+startYear:"2022",
+endYear:"2026",
+score:"8.5 CGPA"
+}];
+
+data.skills={
+programming:["JavaScript","Java","Python"],
+frameworks:["React","Node.js","Express"],
+databases:["MongoDB","MySQL"],
+tools:["Git","GitHub","VS Code"],
+soft:["Communication","Teamwork"]
+};
+
+data.projects=[{
+title:"Resume Builder",
+description:"Built a responsive resume builder with ATS score checker and PDF export.",
+technologies:"HTML, CSS, JavaScript",
+github:"https://github.com/johndoe/resume-builder",
+live:"https://resume-builder-demo.com"
+}];
+
+data.experience=[{
+company:"Tech Solutions",
+role:"Web Developer Intern",
+duration:"Jan 2025 - Mar 2025",
+responsibilities:"Developed responsive web pages and fixed UI bugs."
+}];
+
+data.certifications=[{
+name:"Full Stack Web Development",
+organization:"Udemy",
+issueDate:"2025-01-15",
+credentialUrl:"https://example.com/certificate"
+}];
+
+data.achievements={
+awards:"Best Student Project Award",
+hackathons:"Smart India Hackathon Participant",
+competitions:"Coding Contest Finalist",
+academic:"Dean's List"
+};
+
+init();
+showToast("Sample data loaded successfully.");
+});
+
+document.addEventListener("input",(e)=>{
+const t=e.target;
+if(t && t.type==="email"){
+const emailPattern=/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/;
+t.setCustomValidity(emailPattern.test(t.value)||!t.value?"":"Enter a valid email address");
 }
 });
-},{threshold:0.4});
-sections.forEach(s=>observer.observe(s));
+
+document.addEventListener("change",(e)=>{
+const t=e.target;
+if(t.type==="number"){
+if(t.value && (Number(t.value)<1950 || Number(t.value)>2100)){
+alert("Enter a valid year between 1950 and 2100");
+t.value="";
+}
+}
+});

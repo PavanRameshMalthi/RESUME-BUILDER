@@ -43,7 +43,7 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
         Preview
       </button>
-      <button class="primary-button" type="button" id="downloadPdf">
+      <button class="ghost-button" type="button" id="atsCheck">ATS Score</button><button class="primary-button" type="button" id="downloadPdf">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
         Download PDF
       </button>
@@ -203,7 +203,7 @@
     </section>
   </main>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div id="atsResult" style="padding:10px;font-weight:bold;"></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
