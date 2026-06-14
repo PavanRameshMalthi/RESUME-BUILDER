@@ -1023,3 +1023,17 @@ body.preview-only .preview-pane {
   .skill-input-row { grid-template-columns:1fr; }
   .panel, .repeat-item { padding:12px; }
 }
+
+
+#atsResult{
+  margin:15px 0;
+  padding:18px;
+  border-radius:12px;
+  background:linear-gradient(135deg,#eef4ff,#dbeafe);
+  border-left:6px solid #2563eb;
+  box-shadow:0 4px 12px rgba(37,99,235,.15);
+  color:#1e293b;
+}
+.ats-excellent{border-left-color:#16a34a!important;}
+.ats-good{border-left-color:#2563eb!important;}
+.ats-poor{border-left-color:#dc2626!important;}
